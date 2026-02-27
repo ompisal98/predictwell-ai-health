@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Moon, Footprints, Timer, Keyboard, Mic, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { BehavioralData } from "@/lib/healthEngine";
+import TypingSpeedTest from "@/components/TypingSpeedTest";
 
 interface Props {
   onSubmit: (data: BehavioralData) => void;
@@ -20,6 +21,7 @@ export default function DataInputForm({ onSubmit }: Props) {
   const [values, setValues] = useState<Record<string, number>>(
     Object.fromEntries(fields.map(f => [f.key, f.default]))
   );
+  const [showTypingTest, setShowTypingTest] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +49,15 @@ export default function DataInputForm({ onSubmit }: Props) {
               <label className="flex items-center gap-1.5 text-sm font-medium text-foreground mb-1.5">
                 <Icon className="w-3.5 h-3.5 text-muted-foreground" />
                 {label}
+                {key === "typingSpeed" && (
+                  <button
+                    type="button"
+                    onClick={() => setShowTypingTest(s => !s)}
+                    className="ml-auto text-xs text-primary hover:underline"
+                  >
+                    {showTypingTest ? "Hide test" : "Take test"}
+                  </button>
+                )}
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -62,6 +73,16 @@ export default function DataInputForm({ onSubmit }: Props) {
             </div>
           ))}
         </div>
+
+        {showTypingTest && (
+          <TypingSpeedTest
+            onResult={(wpm) => {
+              setValues(v => ({ ...v, typingSpeed: wpm }));
+              setShowTypingTest(false);
+            }}
+          />
+        )}
+
         <Button type="submit" className="w-full">
           Analyze Health Data
         </Button>
