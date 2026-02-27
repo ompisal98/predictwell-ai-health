@@ -50,9 +50,15 @@ export function generateWeeklyTrends(): WeeklyTrend[] {
   }));
 }
 
-// Simulate AI risk prediction
+// Deterministic hash-like seed from data for slight variation without randomness
+function dataFingerprint(data: BehavioralData): number {
+  return ((data.sleepHours * 7 + data.dailySteps * 3 + data.voiceStressScore * 11 + data.sedentaryHours * 13) % 10);
+}
+
+// Simulate AI risk prediction — deterministic: same inputs always produce same outputs
 export function predictRisk(data: BehavioralData): RiskReport {
   const alerts: string[] = [];
+  const fp = dataFingerprint(data);
 
   // Anomaly detection (simulated Isolation Forest)
   const anomalyScore =
@@ -62,19 +68,27 @@ export function predictRisk(data: BehavioralData): RiskReport {
     (data.sedentaryHours > 10 ? 0.2 : 0);
   const anomalyDetected = anomalyScore > 0.5;
 
-  // Risk calculations (simulated LSTM output)
-  const heartRisk = Math.min(100, Math.floor(
-    20 + (data.sedentaryHours * 3) + (100 - data.dailySteps / 120) * 0.3 + Math.random() * 10
-  ));
-  const depressionRisk = Math.min(100, Math.floor(
-    10 + (8 - data.sleepHours) * 8 + data.voiceStressScore * 0.4 + Math.random() * 10
-  ));
-  const fatigueRisk = Math.min(100, Math.floor(
-    15 + (8 - data.sleepHours) * 10 + (100 - data.deepSleepPercent) * 0.3 + data.sedentaryHours * 2 + Math.random() * 8
-  ));
-  const lifestyleScore = Math.min(100, Math.max(0, Math.floor(
-    100 - heartRisk * 0.25 - depressionRisk * 0.25 - fatigueRisk * 0.25 + Math.random() * 10
+  // Heart risk: sedentary lifestyle + low activity increase risk
+  const heartRisk = Math.min(100, Math.max(0, Math.floor(
+    15 + (data.sedentaryHours * 4) + Math.max(0, (10000 - data.dailySteps) / 200) + fp * 0.5
   )));
+
+  // Depression risk: poor sleep + high stress increase risk
+  const depressionRisk = Math.min(100, Math.max(0, Math.floor(
+    5 + Math.max(0, (7 - data.sleepHours) * 10) + data.voiceStressScore * 0.5 + Math.max(0, (20 - data.deepSleepPercent)) * 0.5
+  )));
+
+  // Fatigue risk: sleep deficit + sedentary behavior
+  const fatigueRisk = Math.min(100, Math.max(0, Math.floor(
+    10 + Math.max(0, (7 - data.sleepHours) * 12) + Math.max(0, (25 - data.deepSleepPercent)) * 0.4 + data.sedentaryHours * 2.5
+  )));
+
+  // Lifestyle score: higher is better — composite of good habits
+  const sleepScore = Math.min(25, (data.sleepHours / 8) * 25);
+  const activityScore = Math.min(25, (data.dailySteps / 10000) * 25);
+  const stressScore = Math.min(25, ((100 - data.voiceStressScore) / 100) * 25);
+  const sedentaryScore = Math.min(25, ((16 - data.sedentaryHours) / 16) * 25);
+  const lifestyleScore = Math.min(100, Math.max(0, Math.floor(sleepScore + activityScore + stressScore + sedentaryScore)));
 
   if (data.sleepHours < 5) alerts.push('⚠️ Critical: Sleep below 5 hours – risk of cognitive impairment.');
   if (data.voiceStressScore > 70) alerts.push('⚠️ High stress detected – consider relaxation techniques.');
