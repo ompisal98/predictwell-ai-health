@@ -3,6 +3,7 @@ import { Moon, Footprints, Timer, Keyboard, Mic, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { BehavioralData } from "@/lib/healthEngine";
 import TypingSpeedTest from "@/components/TypingSpeedTest";
+import GoogleFitButton from "@/components/GoogleFitButton";
 
 interface Props {
   onSubmit: (data: BehavioralData) => void;
@@ -57,6 +58,13 @@ export default function DataInputForm({ onSubmit }: Props) {
                   >
                     {showTypingTest ? "Hide test" : "Take test"}
                   </button>
+                )}
+                {key === "dailySteps" && (
+                  <span className="ml-auto">
+                    <GoogleFitButton
+                      onStepsFetched={(steps) => setValues(v => ({ ...v, dailySteps: steps }))}
+                    />
+                  </span>
                 )}
               </label>
               <div className="flex items-center gap-3">

@@ -1,1 +1,10 @@
 project_id = "scnuugfrukbjyucskuoy"
+
+[functions.google-fit-callback]
+verify_jwt = false
+
+[functions.google-fit-steps]
+verify_jwt = false
+
+[functions.google-fit-auth-url]
+verify_jwt = false
