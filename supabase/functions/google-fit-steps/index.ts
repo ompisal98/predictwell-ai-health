@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
 
   if (tokenError || !tokenRow) {
     return new Response(JSON.stringify({ error: "Google Fit not connected", connected: false }), {
-      status: 404,
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
