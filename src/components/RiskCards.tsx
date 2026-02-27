@@ -1,5 +1,6 @@
-import { Heart, Brain, Battery, Activity, AlertTriangle } from "lucide-react";
+import { Heart, Brain, Battery, Activity, AlertTriangle, Info } from "lucide-react";
 import type { RiskReport } from "@/lib/healthEngine";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 function getRiskLevel(value: number): { label: string; colorClass: string } {
   if (value < 35) return { label: "Low", colorClass: "text-health-good" };
@@ -33,17 +34,18 @@ function CircularProgress({ value, size = 100, strokeWidth = 8, colorClass }: { 
 }
 
 const riskCards = [
-  { key: "heartRisk" as const, label: "Heart Health", icon: Heart, description: "Cardiovascular risk assessment" },
-  { key: "depressionRisk" as const, label: "Depression Risk", icon: Brain, description: "Mental health indicator" },
-  { key: "fatigueRisk" as const, label: "Burnout/Fatigue", icon: Battery, description: "Energy & recovery status" },
-  { key: "lifestyleScore" as const, label: "Lifestyle Score", icon: Activity, description: "Overall wellness balance" },
+  { key: "heartRisk" as const, label: "Heart Health", icon: Heart, description: "Cardiovascular risk assessment", tooltip: "Based on sedentary hours and daily step count. More sedentary time and fewer steps increase cardiac risk." },
+  { key: "depressionRisk" as const, label: "Depression Risk", icon: Brain, description: "Mental health indicator", tooltip: "Driven by sleep deficit, deep sleep percentage, and voice stress score. Poor sleep and high stress raise this risk." },
+  { key: "fatigueRisk" as const, label: "Burnout/Fatigue", icon: Battery, description: "Energy & recovery status", tooltip: "Calculated from sleep hours, deep sleep quality, and sedentary behavior. Less restorative sleep increases fatigue risk." },
+  { key: "lifestyleScore" as const, label: "Lifestyle Score", icon: Activity, description: "Overall wellness balance", tooltip: "Composite of 4 factors (25 pts each): sleep duration, daily steps, stress level, and sedentary hours. Higher is better." },
 ];
 
 export default function RiskCards({ report }: { report: RiskReport }) {
   return (
+    <TooltipProvider delayDuration={200}>
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {riskCards.map(({ key, label, icon: Icon, description }, i) => {
+        {riskCards.map(({ key, label, icon: Icon, description, tooltip }, i) => {
           const value = report[key];
           const isInverse = key === "lifestyleScore";
           const riskValue = isInverse ? 100 - value : value;
@@ -60,13 +62,23 @@ export default function RiskCards({ report }: { report: RiskReport }) {
                 <div className="p-2 rounded-lg bg-primary/10">
                   <Icon className="w-5 h-5 text-primary" />
                 </div>
-                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                  riskValue < 35 ? 'bg-health-good/10 text-health-good' :
-                  riskValue < 65 ? 'bg-health-warning/10 text-health-warning' :
-                  'bg-health-danger/10 text-health-danger'
-                }`}>
-                  {displayLabel}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[220px] text-xs">
+                      {tooltip}
+                    </TooltipContent>
+                  </Tooltip>
+                  <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                    riskValue < 35 ? 'bg-health-good/10 text-health-good' :
+                    riskValue < 65 ? 'bg-health-warning/10 text-health-warning' :
+                    'bg-health-danger/10 text-health-danger'
+                  }`}>
+                    {displayLabel}
+                  </span>
+                </div>
               </div>
               <div className="flex items-center gap-4">
                 <div className="relative">
@@ -99,5 +111,6 @@ export default function RiskCards({ report }: { report: RiskReport }) {
         </div>
       )}
     </div>
+    </TooltipProvider>
   );
 }
