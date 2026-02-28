@@ -31,10 +31,12 @@ export default function Auth() {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
         toast.success("Account created! You're now signed in.");
+        navigate("/", { replace: true });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back!");
+        navigate("/", { replace: true });
       }
     } catch (error: any) {
       toast.error(error.message);
