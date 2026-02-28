@@ -1,10 +1,8 @@
-import { Activity, Shield, LogOut, History } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { Activity, Shield, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Navbar() {
-  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -25,23 +23,15 @@ export default function Navbar() {
             <Shield className="w-3.5 h-3.5" />
             <span>HIPAA-Compliant</span>
           </div>
-          {user && (
-            <>
-              <Button
-                variant={location.pathname === "/history" ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => navigate("/history")}
-                className="gap-1.5"
-              >
-                <History className="w-4 h-4" />
-                <span className="hidden sm:inline">History</span>
-              </Button>
-              <Button variant="ghost" size="sm" onClick={signOut} className="gap-1.5">
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </Button>
-            </>
-          )}
+          <Button
+            variant={location.pathname === "/history" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => navigate("/history")}
+            className="gap-1.5"
+          >
+            <History className="w-4 h-4" />
+            <span className="hidden sm:inline">History</span>
+          </Button>
         </div>
       </div>
     </nav>
