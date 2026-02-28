@@ -1,8 +1,10 @@
-import { Activity, Shield, History } from "lucide-react";
+import { Activity, Shield, History, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Navbar() {
+  const { signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -31,6 +33,10 @@ export default function Navbar() {
           >
             <History className="w-4 h-4" />
             <span className="hidden sm:inline">History</span>
+          </Button>
+          <Button variant="ghost" size="sm" onClick={signOut} className="gap-1.5">
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">Sign Out</span>
           </Button>
         </div>
       </div>
