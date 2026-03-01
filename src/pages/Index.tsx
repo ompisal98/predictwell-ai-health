@@ -12,9 +12,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { format, subDays } from "date-fns";
 
+const emptyExplanation = { factors: [], summary: "" };
 const emptyReport: RiskReport = {
   heartRisk: 0, depressionRisk: 0, fatigueRisk: 0, lifestyleScore: 0,
   anomalyDetected: false, alerts: [],
+  explanations: { heartRisk: emptyExplanation, depressionRisk: emptyExplanation, fatigueRisk: emptyExplanation, lifestyleScore: emptyExplanation },
 };
 
 const Index = () => {
@@ -45,6 +47,7 @@ const Index = () => {
           lifestyleScore: latest.lifestyle_score ?? 0,
           anomalyDetected: latest.anomaly_detected ?? false,
           alerts: latest.alerts ?? [],
+          explanations: emptyReport.explanations,
         });
       }
 
