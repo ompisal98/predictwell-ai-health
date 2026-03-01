@@ -1,6 +1,7 @@
 import { Activity, Shield, History, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import NotificationCenter from "@/components/NotificationCenter";
 import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Navbar() {
@@ -25,6 +26,7 @@ export default function Navbar() {
             <Shield className="w-3.5 h-3.5" />
             <span>HIPAA-Compliant</span>
           </div>
+          <NotificationCenter />
           <Button
             variant={location.pathname === "/history" ? "secondary" : "ghost"}
             size="sm"

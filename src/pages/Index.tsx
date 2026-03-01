@@ -11,6 +11,7 @@ import { AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useNotifications, generateHealthNotifications } from "@/contexts/NotificationContext";
 import { format, subDays } from "date-fns";
 
 const emptyExplanation = { factors: [], summary: "" };
@@ -23,7 +24,9 @@ const emptyReport: RiskReport = {
 const Index = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { addNotification } = useNotifications();
   const [report, setReport] = useState<RiskReport | null>(null);
+  const [previousReport, setPreviousReport] = useState<RiskReport | null>(null);
   const [weeklyData, setWeeklyData] = useState<WeeklyTrend[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -79,8 +82,13 @@ const Index = () => {
 
   const handleDataSubmit = async (data: BehavioralData) => {
     if (!user) return;
+    const prevReport = report;
     const riskReport = predictRisk(data);
+    setPreviousReport(prevReport);
     setReport(riskReport);
+
+    // Generate smart notifications
+    generateHealthNotifications(riskReport, prevReport, addNotification);
 
     const { error } = await supabase.from("health_data").insert({
       user_id: user.id,
