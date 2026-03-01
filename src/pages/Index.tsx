@@ -5,6 +5,7 @@ import TrendChart from "@/components/TrendChart";
 import ActivityHeatmap from "@/components/ActivityHeatmap";
 import DataInputForm from "@/components/DataInputForm";
 import HealthChatbot from "@/components/HealthChatbot";
+import HealthEducation from "@/components/HealthEducation";
 import { predictRisk, type BehavioralData, type RiskReport, type WeeklyTrend } from "@/lib/healthEngine";
 import { AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -166,6 +167,9 @@ const Index = () => {
                 </div>
               )}
             </div>
+
+            {/* Health Education */}
+            <HealthEducation report={report} />
 
             {/* Heatmap */}
             <ActivityHeatmap />
