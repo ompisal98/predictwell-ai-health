@@ -95,10 +95,20 @@ Deno.serve(async (req) => {
     }).eq("user_id", userId);
   }
 
-  // Fetch today's steps from Google Fit
+  // Parse optional timezone offset from client (minutes)
+  let tzOffsetMinutes = 0;
+  try {
+    const body = await req.clone().json();
+    if (body?.tzOffsetMinutes !== undefined) {
+      tzOffsetMinutes = Number(body.tzOffsetMinutes);
+    }
+  } catch { /* no body or invalid JSON */ }
+
+  // Fetch today's steps from Google Fit using user's local timezone
   const now = new Date();
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() * 1e6; // nanoseconds
-  const endOfDay = Date.now() * 1e6;
+  const localNow = new Date(now.getTime() - tzOffsetMinutes * 60000);
+  const startOfDay = new Date(localNow.getFullYear(), localNow.getMonth(), localNow.getDate()).getTime();
+  const endOfDay = startOfDay + 86400000; // full 24h window
 
   try {
     const fitRes = await fetch(
@@ -112,8 +122,8 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           aggregateBy: [{ dataTypeName: "com.google.step_count.delta" }],
           bucketByTime: { durationMillis: 86400000 },
-          startTimeMillis: Math.floor(startOfDay / 1e6),
-          endTimeMillis: Math.floor(endOfDay / 1e6),
+          startTimeMillis: startOfDay,
+          endTimeMillis: endOfDay,
         }),
       }
     );

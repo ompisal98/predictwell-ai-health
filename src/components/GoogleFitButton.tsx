@@ -33,6 +33,7 @@ export default function GoogleFitButton({ onStepsFetched }: Props) {
     try {
       const { data, error } = await supabase.functions.invoke("google-fit-steps", {
         method: "POST",
+        body: { tzOffsetMinutes: new Date().getTimezoneOffset() },
       });
       if (!error && data?.connected) {
         setConnected(true);
@@ -68,6 +69,7 @@ export default function GoogleFitButton({ onStepsFetched }: Props) {
     try {
       const { data, error } = await supabase.functions.invoke("google-fit-steps", {
         method: "POST",
+        body: { tzOffsetMinutes: new Date().getTimezoneOffset() },
       });
       if (error) throw error;
       if (data?.steps !== undefined) {
