@@ -1,5 +1,6 @@
-import { Heart, Brain, Battery, Activity, AlertTriangle, Info } from "lucide-react";
-import type { RiskReport } from "@/lib/healthEngine";
+import { useState } from "react";
+import { Heart, Brain, Battery, Activity, AlertTriangle, Info, ChevronDown, ChevronUp, TrendingUp, TrendingDown, Minus, CheckCircle } from "lucide-react";
+import type { RiskReport, RiskExplanation } from "@/lib/healthEngine";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 function getRiskLevel(value: number): { label: string; colorClass: string } {
@@ -33,14 +34,56 @@ function CircularProgress({ value, size = 100, strokeWidth = 8, colorClass }: { 
   );
 }
 
+const impactConfig = {
+  high: { icon: TrendingUp, color: "text-health-danger", bg: "bg-health-danger/10", label: "High impact" },
+  moderate: { icon: Minus, color: "text-health-warning", bg: "bg-health-warning/10", label: "Moderate" },
+  low: { icon: TrendingDown, color: "text-muted-foreground", bg: "bg-muted", label: "Low impact" },
+  positive: { icon: CheckCircle, color: "text-health-good", bg: "bg-health-good/10", label: "Positive" },
+};
+
+function ExplanationPanel({ explanation }: { explanation: RiskExplanation }) {
+  if (!explanation || explanation.factors.length === 0) return null;
+
+  return (
+    <div className="mt-3 pt-3 border-t border-border space-y-2 animate-float-up">
+      {explanation.factors.map((factor, i) => {
+        const config = impactConfig[factor.impact];
+        const Icon = config.icon;
+        return (
+          <div key={i} className="flex items-start gap-2">
+            <div className={`p-1 rounded ${config.bg} mt-0.5 flex-shrink-0`}>
+              <Icon className={`w-3 h-3 ${config.color}`} />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-medium text-foreground">{factor.label}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${config.bg} ${config.color} font-medium`}>
+                  {config.label}
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-snug mt-0.5">{factor.detail}</p>
+            </div>
+          </div>
+        );
+      })}
+      <p className="text-xs text-foreground/70 italic pt-1 border-t border-border/50">
+        💡 {explanation.summary}
+      </p>
+    </div>
+  );
+}
+
 const riskCards = [
-  { key: "heartRisk" as const, label: "Heart Health", icon: Heart, description: "Cardiovascular risk assessment", tooltip: "Based on sedentary hours and daily step count. More sedentary time and fewer steps increase cardiac risk." },
-  { key: "depressionRisk" as const, label: "Depression Risk", icon: Brain, description: "Mental health indicator", tooltip: "Driven by sleep deficit, deep sleep percentage, and voice stress score. Poor sleep and high stress raise this risk." },
-  { key: "fatigueRisk" as const, label: "Burnout/Fatigue", icon: Battery, description: "Energy & recovery status", tooltip: "Calculated from sleep hours, deep sleep quality, and sedentary behavior. Less restorative sleep increases fatigue risk." },
-  { key: "lifestyleScore" as const, label: "Lifestyle Score", icon: Activity, description: "Overall wellness balance", tooltip: "Composite of 4 factors (25 pts each): sleep duration, daily steps, stress level, and sedentary hours. Higher is better." },
+  { key: "heartRisk" as const, label: "Heart Health", icon: Heart, description: "Cardiovascular risk assessment", tooltip: "Based on sedentary hours and daily step count." },
+  { key: "depressionRisk" as const, label: "Depression Risk", icon: Brain, description: "Mental health indicator", tooltip: "Driven by sleep, deep sleep %, and voice stress." },
+  { key: "fatigueRisk" as const, label: "Burnout/Fatigue", icon: Battery, description: "Energy & recovery status", tooltip: "From sleep hours, deep sleep quality, and inactivity." },
+  { key: "lifestyleScore" as const, label: "Lifestyle Score", icon: Activity, description: "Overall wellness balance", tooltip: "Composite of sleep, steps, stress, and movement." },
 ];
 
 export default function RiskCards({ report }: { report: RiskReport }) {
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const hasExplanations = report.explanations && report.explanations.heartRisk.factors.length > 0;
+
   return (
     <TooltipProvider delayDuration={200}>
     <div className="space-y-6">
@@ -51,6 +94,8 @@ export default function RiskCards({ report }: { report: RiskReport }) {
           const riskValue = isInverse ? 100 - value : value;
           const { label: riskLabel, colorClass } = getRiskLevel(riskValue);
           const displayLabel = isInverse ? (value > 65 ? "Good" : value > 35 ? "Fair" : "Poor") : riskLabel;
+          const isExpanded = expandedCard === key;
+          const explanation = report.explanations?.[key];
 
           return (
             <div
@@ -92,6 +137,24 @@ export default function RiskCards({ report }: { report: RiskReport }) {
                   <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
                 </div>
               </div>
+
+              {/* Expand/Collapse for Explanation */}
+              {hasExplanations && (
+                <button
+                  onClick={() => setExpandedCard(isExpanded ? null : key)}
+                  className="w-full mt-3 flex items-center justify-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
+                >
+                  {isExpanded ? (
+                    <>Hide insights <ChevronUp className="w-3.5 h-3.5" /></>
+                  ) : (
+                    <>Why this score? <ChevronDown className="w-3.5 h-3.5" /></>
+                  )}
+                </button>
+              )}
+
+              {isExpanded && explanation && (
+                <ExplanationPanel explanation={explanation} />
+              )}
             </div>
           );
         })}
