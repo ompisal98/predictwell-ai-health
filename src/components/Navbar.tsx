@@ -1,4 +1,4 @@
-import { Activity, Shield, History, LogOut } from "lucide-react";
+import { Activity, Shield, History, LogOut, UserCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import NotificationCenter from "@/components/NotificationCenter";
@@ -35,6 +35,15 @@ export default function Navbar() {
           >
             <History className="w-4 h-4" />
             <span className="hidden sm:inline">History</span>
+          </Button>
+          <Button
+            variant={location.pathname === "/profile" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => navigate("/profile")}
+            className="gap-1.5"
+          >
+            <UserCircle className="w-4 h-4" />
+            <span className="hidden sm:inline">Profile</span>
           </Button>
           <Button variant="ghost" size="sm" onClick={signOut} className="gap-1.5">
             <LogOut className="w-4 h-4" />
