@@ -79,8 +79,10 @@ Deno.serve(async (req) => {
     const refreshData = await refreshRes.json();
     if (!refreshRes.ok) {
       console.error("Refresh failed:", refreshData);
-      return new Response(JSON.stringify({ error: "Token refresh failed", connected: false }), {
-        status: 401,
+      // Token revoked/expired – delete stale record so user can reconnect
+      await supabaseAdmin.from("google_fit_tokens").delete().eq("user_id", userId);
+      return new Response(JSON.stringify({ error: "Google Fit session expired. Please reconnect.", connected: false }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
